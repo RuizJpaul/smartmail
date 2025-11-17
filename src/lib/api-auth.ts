@@ -1,9 +1,10 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { auth } from "@/lib/auth";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
 export async function getUserFromSession(req: NextApiRequest, res: NextApiResponse) {
-  const session = await auth();
+  const session = await getServerSession(req, res, authOptions);
   
   if (!session?.user?.email) {
     return null;

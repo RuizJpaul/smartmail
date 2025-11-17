@@ -1,0 +1,72 @@
+[
+  {
+    "id": "email-001",
+    "email": "cliente@empresa.com",
+    "received_at": "2024-11-15T09:15:00Z",
+    "subject": "Reunión urgente - Propuesta Q4",
+    "body": "Hola, necesito que revisemos la propuesta para el Q4. Es urgente que nos reunamos esta semana para discutir los detalles del proyecto. ¿Tienes disponibilidad el jueves?"
+  },
+  {
+    "id": "email-002",
+    "email": "lead@startup.io",
+    "received_at": "2024-11-15T10:30:00Z",
+    "subject": "Interesado en sus servicios",
+    "body": "Buenos días, soy el fundador de una startup y estoy interesado en sus servicios de consultoría. ¿Podríamos agendar una llamada para discutir nuestras necesidades?"
+  },
+  {
+    "id": "email-003",
+    "email": "equipo@miempresa.com",
+    "received_at": "2024-11-15T11:45:00Z",
+    "subject": "Reporte semanal - Stand up",
+    "body": "Hola equipo, adjunto el reporte semanal con los avances del proyecto. Por favor revisen y confirmen asistencia al stand up de mañana a las 10am."
+  },
+  {
+    "id": "email-004",
+    "email": "spam@marketing.xyz",
+    "received_at": "2024-11-15T12:00:00Z",
+    "subject": "¡Oferta especial! 50% de descuento",
+    "body": "OFERTA LIMITADA! Aprovecha nuestro descuento del 50% en todos los productos. Haz clic aquí para obtener tu cupón AHORA!!!"
+  },
+  {
+    "id": "email-005",
+    "email": "cliente.vip@corporacion.com",
+    "received_at": "2024-11-15T14:20:00Z",
+    "subject": "Renovación de contrato - Urgente",
+    "body": "Estimado, necesito renovar el contrato antes de fin de mes. Por favor envíame la propuesta actualizada con los nuevos términos lo antes posible."
+  },
+  {
+    "id": "email-006",
+    "email": "proveedor@servicios.com",
+    "received_at": "2024-11-15T15:30:00Z",
+    "subject": "Factura pendiente de pago",
+    "body": "Buen día, adjunto la factura #12345 con vencimiento el 20 de noviembre. Por favor confirmen la recepción y procesamiento del pago."
+  },
+  {
+    "id": "email-007",
+    "email": "nuevo.lead@empresa.net",
+    "received_at": "2024-11-16T08:00:00Z",
+    "subject": "Solicitud de cotización",
+    "body": "Buenos días, estamos buscando un proveedor para desarrollo de software. ¿Podrían enviarnos una cotización para un proyecto de 6 meses?"
+  },
+  {
+    "id": "email-008",
+    "email": "soporte@plataforma.com",
+    "received_at": "2024-11-16T09:15:00Z",
+    "subject": "Reporte de incidente #7890",
+    "body": "Se ha registrado un incidente en el sistema. Por favor revisar el ticket #7890 y actualizar el estado. Prioridad: Media."
+  },
+  {
+    "id": "email-009",
+    "email": "cliente@pyme.com",
+    "received_at": "2024-11-16T10:45:00Z",
+    "subject": "Dudas sobre implementación",
+    "body": "Hola, tenemos algunas dudas sobre la implementación del nuevo sistema. ¿Podemos agendar una sesión de capacitación para el equipo la próxima semana?"
+  },
+  {
+    "id": "email-010",
+    "email": "marketing@competencia.com",
+    "received_at": "2024-11-16T11:30:00Z",
+    "subject": "Newsletter mensual",
+    "body": "Descubre las últimas tendencias en marketing digital. Lee nuestro newsletter con tips y estrategias para hacer crecer tu negocio."
+  }
+]
