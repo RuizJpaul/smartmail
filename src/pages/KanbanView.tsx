@@ -56,10 +56,11 @@ const KanbanView = () => {
   const [filtersInProgress, setFiltersInProgress] = useState({ cliente: true, lead: true, interno: true });
   const [filtersDone, setFiltersDone] = useState({ cliente: true, lead: true, interno: true });
 
+  // Usar endpoint dedicado para obtener todas las tareas procesadas por IA (hasTask=true)
   const { data, refetch } = useQuery({
-    queryKey: ["emails", "kanban"],
+    queryKey: ["emails", "kanban-tasks"],
     queryFn: async () => {
-      const res = await fetch(`/api/emails`);
+      const res = await fetch(`/api/emails/kanban-tasks`);
       const json = await res.json();
       return json.emails as any[];
     },

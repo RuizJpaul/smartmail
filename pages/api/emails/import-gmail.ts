@@ -19,8 +19,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(400).json({ error: 'No linked Google account with refresh token. Please click "Vincular Bandeja" to re-authorize.' });
     }
 
+    // Leer parámetros de fecha
+    let after: string | undefined = undefined;
+    if (req.body?.range) {
+      const now = new Date();
+      if (req.body.range === "week") {
+        after = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
+      } else if (req.body.range === "month") {
+        after = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString();
+      } else if (req.body.range === "custom" && req.body.after) {
+        after = new Date(req.body.after).toISOString();
+      }
+    }
     try {
-      const result = await importUserGmail(account.refresh_token, user.id, { pageSize: 200 });
+      const result = await importUserGmail(account.refresh_token, user.id, { pageSize: 200, after });
       return res.status(200).json({ ok: true, ...result });
     } catch (err: any) {
       console.error('[API /emails/import-gmail] gmail API error:', err);

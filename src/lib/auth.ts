@@ -14,15 +14,11 @@ export const authOptions: NextAuthOptions = {
           prompt: "consent",
           access_type: "offline",
           response_type: "code",
-          // Request Gmail readonly scope in addition to the usual OpenID scopes.
-          // IMPORTANT: You still must add this scope in the Google Cloud OAuth
-          // Consent Screen (under Scopes) and add your account as a Test User
-          // while the app is in Testing mode.
           scope: [
             "openid",
             "email",
             "profile",
-            "https://www.googleapis.com/auth/gmail.readonly",
+            "https://www.googleapis.com/auth/gmail.readonly"
           ].join(" "),
         },
       },
@@ -39,6 +35,13 @@ export const authOptions: NextAuthOptions = {
       }
       return session;
     },
+      async signIn({ user, account, profile, email, credentials }) {
+        if (account && 'refresh_token_expires_in' in account) {
+          delete account.refresh_token_expires_in;
+        }
+        console.log('[NextAuth] signIn callback:', { user, account, profile, email, credentials });
+        return true;
+      },
   },
   session: {
     strategy: "database",

@@ -51,6 +51,10 @@ interface Email {
 
 const EmailsView = () => {
   const [emails, setEmails] = useState<Email[]>([]);
+    const [isDeletingAll, setIsDeletingAll] = useState(false);
+  const [isImportingGmail, setIsImportingGmail] = useState(false);
+  const [gmailRange, setGmailRange] = useState<'all'|'week'|'month'|'custom'>('all');
+  const [gmailCustomDate, setGmailCustomDate] = useState<string>('');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [total, setTotal] = useState(0);
@@ -72,6 +76,7 @@ const EmailsView = () => {
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [prioritySort, setPrioritySort] = useState<"none" | "priority" | "category_priority">("none");
   const [isProcessingIA, setIsProcessingIA] = useState(false);
+  const [abortController, setAbortController] = useState<AbortController | null>(null);
 
   const { data, refetch } = useQuery({
     queryKey: ["emails", searchTerm, sortOrder, currentPage, limit],
@@ -87,6 +92,51 @@ const EmailsView = () => {
       return json;
     },
   });
+
+  // Importar correos reales desde Gmail
+  const handleImportGmail = async () => {
+    setIsImportingGmail(true);
+    const controller = new AbortController();
+    setAbortController(controller);
+    try {
+      let body: any = {};
+      if (gmailRange !== 'all') {
+        body.range = gmailRange;
+        if (gmailRange === 'custom' && gmailCustomDate) {
+          body.after = gmailCustomDate;
+        }
+      }
+      const res = await fetch("/api/emails/import-gmail", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+        signal: controller.signal,
+      });
+      const json = await res.json();
+      if (json.ok) {
+        toast.success(`Importados ${json.imported} correos de Gmail.`);
+        refetch();
+      } else {
+        toast.error(json.error || "Error al importar correos de Gmail.");
+      }
+    } catch (err) {
+      if (err.name === 'AbortError') {
+        toast.info('Importación cancelada.');
+      } else {
+        toast.error("Error al importar correos de Gmail.");
+      }
+    }
+    setIsImportingGmail(false);
+    setAbortController(null);
+  };
+
+  const handleCancelImport = () => {
+    if (abortController) {
+      abortController.abort();
+      setIsImportingGmail(false);
+      setAbortController(null);
+    }
+  };
 
   useEffect(() => {
     if (data) {
@@ -368,10 +418,96 @@ const EmailsView = () => {
     }
   };
 
+  // Eliminar todos los correos del usuario
+  const deleteAllEmails = async () => {
+    if (!confirm("¿Eliminar TODOS los correos? Esta acción no se puede deshacer.")) {
+      return;
+    }
+    setIsDeletingAll(true);
+    try {
+      const res = await fetch("/api/emails/delete", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ deleteAll: true }),
+      });
+      const json = await res.json();
+      if (res.ok) {
+        toast.success(json.message || `${json.deleted} email(s) eliminados`);
+        setSelectedIds(new Set());
+        await refetch();
+      } else {
+        toast.error(json.error || "Error al eliminar todos los emails");
+      }
+    } catch (error) {
+      toast.error("Error de conexión al eliminar todos los emails");
+      console.error(error);
+    } finally {
+      setIsDeletingAll(false);
+    }
+  };
+
   const showLoading = isImporting || isDeleting;
 
   return (
     <div className="space-y-6 relative">
+      {/* Botón importar Gmail */}
+      <div className="mb-4 flex gap-2 items-center">
+        <div className="flex gap-2 items-center">
+          <label className="text-sm font-medium text-slate-700 dark:text-slate-200">Rango:</label>
+          <select
+            value={gmailRange}
+            onChange={e => setGmailRange(e.target.value as any)}
+            className="border rounded px-2 py-1 text-sm bg-white dark:bg-slate-800"
+            disabled={isImportingGmail}
+          >
+            <option value="all">Todos</option>
+            <option value="week">Última semana</option>
+            <option value="month">Último mes</option>
+            <option value="custom">Personalizado</option>
+          </select>
+          {gmailRange === 'custom' && (
+            <input
+              type="date"
+              value={gmailCustomDate}
+              onChange={e => setGmailCustomDate(e.target.value)}
+              className="border rounded px-2 py-1 text-sm bg-white dark:bg-slate-800"
+              disabled={isImportingGmail}
+            />
+          )}
+        </div>
+        <button
+          onClick={handleImportGmail}
+          disabled={isImportingGmail}
+          className="inline-flex items-center px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 rounded border border-slate-300 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700 transition"
+        >
+          {isImportingGmail ? (
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          ) : (
+            <Mail className="mr-2 h-4 w-4" />
+          )}
+          Importar correos reales de Gmail
+        </button>
+        {isImportingGmail && (
+          <button
+            onClick={handleCancelImport}
+            className="inline-flex items-center px-4 py-2 bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 rounded border border-red-300 dark:border-red-700 hover:bg-red-200 dark:hover:bg-red-800 transition"
+          >
+            Cancelar
+          </button>
+        )}
+        <button
+          onClick={deleteAllEmails}
+          disabled={isDeletingAll}
+          className="inline-flex items-center px-4 py-2 bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 rounded border border-red-300 dark:border-red-700 hover:bg-red-200 dark:hover:bg-red-800 transition"
+        >
+          {isDeletingAll ? (
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          ) : (
+            <Trash2 className="mr-2 h-4 w-4" />
+          )}
+          Borrar todos los correos
+        </button>
+      </div>
       {showLoading && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm animate-fade-in">
           <div className="flex flex-col items-center gap-4 p-8 bg-white dark:bg-slate-900 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700">
@@ -499,6 +635,8 @@ const EmailsView = () => {
         </Card>
       )}
 
+      {/* Eliminada la segunda barra de acciones redundante */}
+
       {/* Email Table */}
       <Card className="shadow-card border-0">
         <Table>
@@ -558,7 +696,6 @@ const EmailsView = () => {
           <TableBody>
             {filteredEmails.map((email, index) => {
               const priorityInfo = getPriorityBadge(email.priority);
-              
               // Determinar el color del borde según prioridad
               let borderColor = '#94a3b8'; // slate-400 default
               if (email.priority === 'alta') {

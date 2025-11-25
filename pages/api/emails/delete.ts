@@ -6,8 +6,9 @@ import { getUserFromSession, unauthorizedResponse } from "@/lib/api-auth";
 const BodySchema = z.object({
   id: z.string().optional(),
   ids: z.array(z.string()).optional(),
-}).refine(data => data.id || (data.ids && data.ids.length > 0), {
-  message: "Debe proporcionar 'id' o 'ids'",
+  deleteAll: z.boolean().optional(),
+}).refine(data => data.deleteAll || data.id || (data.ids && data.ids.length > 0), {
+  message: "Debe proporcionar 'id', 'ids' o 'deleteAll'",
 });
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -22,7 +23,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const user = await getUserFromSession(req, res);
     if (!user) return unauthorizedResponse(res);
 
-    const { id, ids } = parsed.data;
+    const { id, ids, deleteAll } = parsed.data;
+    // Eliminar todos los correos del usuario
+    if (deleteAll) {
+      const result = await prisma.email.deleteMany({
+        where: { userId: user.id },
+      });
+      return res.status(200).json({
+        ok: true,
+        message: `${result.count} email(s) eliminados correctamente`,
+        deleted: result.count,
+      });
+    }
 
     // Eliminar un solo email
     if (id) {

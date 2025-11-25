@@ -80,7 +80,6 @@ const EmailDetailsDialog = ({ email, open, onOpenChange }: EmailDetailsDialogPro
   };
 
   const saveMetadata = async () => {
-    if (window.setKanbanLoading) window.setKanbanLoading(true);
     const res = await fetch("/api/emails/update", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -89,26 +88,17 @@ const EmailDetailsDialog = ({ email, open, onOpenChange }: EmailDetailsDialogPro
     const json = await res.json();
     if (res.ok) {
       toast.success("Cambios guardados");
-      if (window.setEmails) {
-        window.setEmails((prev) => prev.map(e =>
-          e.id === email.id
-            ? { ...e, hasTask, category, priority, taskDescription }
-            : e
-        ));
-      }
       window.dispatchEvent(new CustomEvent("emails:refresh"));
       onOpenChange(false);
     } else {
       toast.error(json.error || "Error al guardar");
     }
-    if (window.setKanbanLoading) window.setKanbanLoading(false);
   };
 
   const deleteEmail = async () => {
     if (!confirm("¿Eliminar este email? Esta acción no se puede deshacer.")) {
       return;
     }
-    if (window.setKanbanLoading) window.setKanbanLoading(true);
     try {
       const res = await fetch("/api/emails/delete", {
         method: "DELETE",
@@ -120,9 +110,6 @@ const EmailDetailsDialog = ({ email, open, onOpenChange }: EmailDetailsDialogPro
 
       if (res.ok) {
         toast.success(json.message || "Email eliminado correctamente");
-        if (window.setEmails) {
-          window.setEmails((prev) => prev.filter(e => e.id !== email.id));
-        }
         window.dispatchEvent(new CustomEvent("emails:refresh"));
         onOpenChange(false);
       } else {
@@ -132,7 +119,6 @@ const EmailDetailsDialog = ({ email, open, onOpenChange }: EmailDetailsDialogPro
       toast.error("Error de conexión al eliminar email");
       console.error(error);
     }
-    if (window.setKanbanLoading) window.setKanbanLoading(false);
   };
 
   const getCategoryBadge = (category?: string) => {
@@ -156,112 +142,116 @@ const EmailDetailsDialog = ({ email, open, onOpenChange }: EmailDetailsDialogPro
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg bg-white dark:bg-slate-900 border-4 border-red-500 z-[9999]">
-        <DialogHeader>
-          <DialogTitle className="text-2xl">{email.subject}</DialogTitle>
-          <DialogDescription>Detalles completos del email</DialogDescription>
-        </DialogHeader>
+      <DialogContent
+        className="max-w-full w-full sm:max-w-2xl md:max-w-3xl lg:max-w-4xl xl:max-w-5xl bg-white dark:bg-slate-900 border-2 border-slate-300 dark:border-slate-700 z-[9999] p-0 flex flex-col items-center justify-center"
+        style={{ maxHeight: '90vh', overflow: 'auto', margin: '0 auto' }}
+      >
+        <div className="w-full max-w-2xl mx-auto p-6">
+          <DialogHeader>
+            <DialogTitle className="text-2xl break-words">{email.subject}</DialogTitle>
+            <DialogDescription>Detalles completos del email</DialogDescription>
+          </DialogHeader>
 
-        <div className="space-y-6">
-          {/* Metadata */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="flex items-center gap-2 text-sm">
-              <User className="h-4 w-4 text-muted-foreground" />
-              <span className="text-muted-foreground">De:</span>
-              <span className="font-medium">{email.email}</span>
-            </div>
-            <div className="flex items-center gap-2 text-sm">
-              <Calendar className="h-4 w-4 text-muted-foreground" />
-              <span className="text-muted-foreground">Fecha:</span>
-              <span className="font-medium">
-                {new Date(email.received_at).toLocaleString("es-ES")}
-              </span>
-            </div>
-          </div>
-
-          {/* Badges */}
-          <div className="flex flex-wrap gap-2">
-            {email.category && (
-              <div className="flex items-center gap-1.5">
-                <Tag className="h-4 w-4 text-muted-foreground" />
-                <Badge className={getCategoryBadge(email.category)}>
-                  {email.category}
-                </Badge>
+          <div className="space-y-6">
+            {/* Metadata */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="flex items-center gap-2 text-sm">
+                <User className="h-4 w-4 text-muted-foreground" />
+                <span className="text-muted-foreground">De:</span>
+                <span className="font-medium break-all">{email.email}</span>
               </div>
-            )}
-            {email.priority && (
-              <div className="flex items-center gap-1.5">
-                <Flag className="h-4 w-4 text-muted-foreground" />
-                <Badge className={getPriorityBadge(email.priority)}>
-                  Prioridad {email.priority}
-                </Badge>
+              <div className="flex items-center gap-2 text-sm">
+                <Calendar className="h-4 w-4 text-muted-foreground" />
+                <span className="text-muted-foreground">Fecha:</span>
+                <span className="font-medium">
+                  {new Date(email.received_at).toLocaleString("es-ES")}
+                </span>
               </div>
-            )}
-            {email.hasTask && (
-              <Badge className="bg-primary/10 text-primary">Tiene tarea</Badge>
-            )}
-            <Badge className={email.processed ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"}>
-              {email.processed ? "Procesado" : "No procesado"}
-            </Badge>
-          </div>
+            </div>
+            {/* Badges */}
+            <div className="flex flex-wrap gap-2">
+              {email.category && (
+                <div className="flex items-center gap-1.5">
+                  <Tag className="h-4 w-4 text-muted-foreground" />
+                  <Badge className={getCategoryBadge(email.category)}>
+                    {email.category}
+                  </Badge>
+                </div>
+              )}
+              {email.priority && (
+                <div className="flex items-center gap-1.5">
+                  <Flag className="h-4 w-4 text-muted-foreground" />
+                  <Badge className={getPriorityBadge(email.priority)}>
+                    Prioridad {email.priority}
+                  </Badge>
+                </div>
+              )}
+              {email.hasTask && (
+                <Badge className="bg-primary/10 text-primary">Tiene tarea</Badge>
+              )}
+              <Badge className={email.processed ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"}>
+                {email.processed ? "Procesado" : "No procesado"}
+              </Badge>
+            </div>
 
-          <div className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="text-xs text-muted-foreground">Categoría</label>
+                  <select
+                    className="mt-1 block w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                    value={category}
+                    onChange={e => setCategory(e.target.value)}
+                  >
+                    <option value="cliente">cliente</option>
+                    <option value="lead">lead</option>
+                    <option value="interno">interno</option>
+                    <option value="spam">spam</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-xs text-muted-foreground">Prioridad</label>
+                  <select
+                    className="mt-1 block w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                    value={priority}
+                    onChange={e => setPriority(e.target.value)}
+                  >
+                    <option value="alta">alta</option>
+                    <option value="media">media</option>
+                    <option value="baja">baja</option>
+                  </select>
+                </div>
+                <div className="flex items-end gap-2">
+                  <Input type="checkbox" checked={hasTask} onChange={(e) => setHasTask(e.currentTarget.checked)} />
+                  <span className="text-xs text-muted-foreground">Convertir en tarea</span>
+                </div>
+              </div>
               <div>
-                <label className="text-xs text-muted-foreground">Categoría</label>
-                <select
-                  className="mt-1 block w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-                  value={category}
-                  onChange={e => setCategory(e.target.value)}
-                >
-                  <option value="cliente">cliente</option>
-                  <option value="lead">lead</option>
-                  <option value="interno">interno</option>
-                  <option value="spam">spam</option>
-                </select>
+                <label className="text-xs text-muted-foreground">Descripción de tarea</label>
+                <Textarea className="mt-1" value={taskDescription} onChange={(e) => setTaskDescription(e.target.value)} />
               </div>
-              <div>
-                <label className="text-xs text-muted-foreground">Prioridad</label>
-                <select
-                  className="mt-1 block w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-                  value={priority}
-                  onChange={e => setPriority(e.target.value)}
-                >
-                  <option value="alta">alta</option>
-                  <option value="media">media</option>
-                  <option value="baja">baja</option>
-                </select>
-              </div>
-              <div className="flex items-end gap-2">
-                <Input type="checkbox" checked={hasTask} onChange={(e) => setHasTask(e.currentTarget.checked)} />
-                <span className="text-xs text-muted-foreground">Convertir en tarea</span>
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
+                <Button onClick={saveMetadata}>Guardar cambios</Button>
               </div>
             </div>
-            <div>
-              <label className="text-xs text-muted-foreground">Descripción de tarea</label>
-              <Textarea className="mt-1" value={taskDescription} onChange={(e) => setTaskDescription(e.target.value)} />
-            </div>
-            <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
-              <Button onClick={saveMetadata}>Guardar cambios</Button>
-            </div>
-          </div>
 
-          <div className="flex justify-end">
-            <Button variant="destructive" onClick={deleteEmail} className="gap-2">
-              <Trash2 className="h-4 w-4" />
-              Eliminar email
-            </Button>
-          </div>
+            <div className="flex justify-end">
+              <Button variant="destructive" onClick={deleteEmail} className="gap-2">
+                <Trash2 className="h-4 w-4" />
+                Eliminar email
+              </Button>
+            </div>
 
-          {/* Email Body */}
-          <div className="space-y-2">
-            <h4 className="font-semibold text-sm text-foreground">Contenido</h4>
-            <div className="bg-muted/30 p-4 rounded-lg border border-border">
-              <p className="text-sm text-foreground whitespace-pre-wrap">
-                {email.body ||
-                  "Este es el contenido del email. En la versión completa, aquí se mostrará el cuerpo completo del mensaje con formato preservado."}
-              </p>
+            {/* Email Body */}
+            <div className="space-y-2">
+              <h4 className="font-semibold text-sm text-foreground">Contenido</h4>
+              <div className="bg-muted/30 p-4 rounded-lg border border-border max-h-64 overflow-auto">
+                <p className="text-sm text-foreground whitespace-pre-wrap break-words">
+                  {email.body ||
+                    "Este es el contenido del email. En la versión completa, aquí se mostrará el cuerpo completo del mensaje con formato preservado."}
+                </p>
+              </div>
             </div>
           </div>
         </div>

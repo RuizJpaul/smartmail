@@ -25,7 +25,7 @@ function walkPartsForBody(part: any, out: { text: string; html: string }) {
   }
 }
 
-export async function importUserGmail(refreshToken: string, userId: string, opts?: { pageSize?: number; maxTotal?: number }) {
+export async function importUserGmail(refreshToken: string, userId: string, opts?: { pageSize?: number; maxTotal?: number; after?: string }) {
   const oAuth2Client = new google.auth.OAuth2(process.env.GOOGLE_CLIENT_ID, process.env.GOOGLE_CLIENT_SECRET);
   oAuth2Client.setCredentials({ refresh_token: refreshToken });
   const gmail = google.gmail({ version: "v1", auth: oAuth2Client });
@@ -39,7 +39,17 @@ export async function importUserGmail(refreshToken: string, userId: string, opts
 
     let nextPageToken: string | undefined = undefined;
     do {
-      const listRes = await gmail.users.messages.list({ userId: "me", maxResults: pageSize, pageToken: nextPageToken });
+      // Si se especifica after, usar query para filtrar por fecha
+      let q = undefined;
+      if (opts?.after) {
+        // Gmail query: after:YYYY/MM/DD
+        const afterDate = new Date(opts.after);
+        const y = afterDate.getFullYear();
+        const m = String(afterDate.getMonth() + 1).padStart(2, '0');
+        const d = String(afterDate.getDate()).padStart(2, '0');
+        q = `after:${y}/${m}/${d}`;
+      }
+      const listRes = await gmail.users.messages.list({ userId: "me", maxResults: pageSize, pageToken: nextPageToken, q });
       const msgs = listRes.data.messages || [];
       allMessages.push(...(msgs as any));
       nextPageToken = listRes.data.nextPageToken as string | undefined;
@@ -59,6 +69,12 @@ export async function importUserGmail(refreshToken: string, userId: string, opts
         const subject = extractHeaders(headers, "Subject") || "(sin asunto)";
         const dateHeader = extractHeaders(headers, "Date");
         const receivedAt = dateHeader ? new Date(dateHeader) : new Date();
+
+        // Filtrar por fecha si se especifica opts.after
+        if (opts?.after) {
+          const afterDate = new Date(opts.after);
+          if (receivedAt < afterDate) continue;
+        }
 
         const out = { text: "", html: "" };
         walkPartsForBody(payload, out);
@@ -84,8 +100,8 @@ export async function importUserGmail(refreshToken: string, userId: string, opts
             errors.push({ id: m.id, error: String(dbErr?.message || dbErr) });
           }
         }
-      } catch (err: any) {
-        errors.push({ id: m.id, error: String(err?.message || err) });
+      } catch (err) {
+        errors.push({ id: m.id, error: String(err) });
       }
     }
 
