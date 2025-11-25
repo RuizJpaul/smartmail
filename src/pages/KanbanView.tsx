@@ -26,20 +26,7 @@ interface Email {
 const KanbanView = () => {
       const [isLoading, setIsLoading] = useState(false);
 
-      // Exponer setEmails y setIsLoading para el modal
-      React.useEffect(() => {
-        window.setEmails = setEmails;
-        window.setKanbanLoading = setIsLoading;
-        return () => {
-          delete window.setEmails;
-          delete window.setKanbanLoading;
-        };
-      }, []);
-    // Exponer setEmails para actualización inmediata desde el modal
-    React.useEffect(() => {
-      window.setEmails = setEmails;
-      return () => { delete window.setEmails; };
-    }, []);
+      // Eliminado: no exponer setEmails ni setKanbanLoading en window. Usar solo estado local y eventos.
   const [emails, setEmails] = useState<Email[]>([]);
   const [selectedEmail, setSelectedEmail] = useState<Email | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
