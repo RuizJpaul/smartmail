@@ -639,56 +639,56 @@ const EmailsView = () => {
 
       {/* Email Table */}
       <Card className="shadow-card border-0">
-        <Table>
+        <Table className="w-full">
           <TableHeader>
             <TableRow className="bg-gradient-to-r from-slate-50 to-gray-50 dark:from-slate-900 dark:to-gray-900 border-b-2 border-slate-200 dark:border-slate-700">
-              <TableHead className="w-12">
+              <TableHead className="w-10 text-center">
                 <input
                   type="checkbox"
                   className="rounded border-2 border-slate-300 dark:border-slate-600"
                   onChange={(e) => selectAll(e.currentTarget.checked)}
                 />
               </TableHead>
-              <TableHead className="font-semibold text-slate-700 dark:text-slate-300">
+              <TableHead className="min-w-[180px] font-semibold text-slate-700 dark:text-slate-300">
                 <div className="flex items-center gap-2">
                   <Mail className="h-4 w-4" />
-                  Remitente
+                  <span>Remitente</span>
                 </div>
               </TableHead>
-              <TableHead className="font-semibold text-slate-700 dark:text-slate-300">
+              <TableHead className="min-w-[260px] font-semibold text-slate-700 dark:text-slate-300">
                 <div className="flex items-center gap-2">
                   <FileText className="h-4 w-4" />
-                  Asunto
+                  <span>Asunto</span>
                 </div>
               </TableHead>
-              <TableHead className="font-semibold text-slate-700 dark:text-slate-300">
-                <div className="flex items-center gap-2">
+              <TableHead className="w-32 font-semibold text-slate-700 dark:text-slate-300 text-center">
+                <div className="flex items-center gap-2 justify-center">
                   <Check className="h-4 w-4" />
-                  Procesado
+                  <span>Procesado</span>
                 </div>
               </TableHead>
-              <TableHead className="font-semibold text-slate-700 dark:text-slate-300">
-                <div className="flex items-center gap-2">
+              <TableHead className="w-32 font-semibold text-slate-700 dark:text-slate-300 text-center">
+                <div className="flex items-center gap-2 justify-center">
                   <Tag className="h-4 w-4" />
-                  Categoría
+                  <span>Categoría</span>
                 </div>
               </TableHead>
-              <TableHead className="font-semibold text-slate-700 dark:text-slate-300">
-                <div className="flex items-center gap-2">
+              <TableHead className="w-32 font-semibold text-slate-700 dark:text-slate-300 text-center">
+                <div className="flex items-center gap-2 justify-center">
                   <AlertCircle className="h-4 w-4" />
-                  Prioridad
+                  <span>Prioridad</span>
                 </div>
               </TableHead>
-              <TableHead className="font-semibold text-slate-700 dark:text-slate-300">
-                <div className="flex items-center gap-2">
+              <TableHead className="w-32 font-semibold text-slate-700 dark:text-slate-300 text-center">
+                <div className="flex items-center gap-2 justify-center">
                   <Sparkles className="h-4 w-4" />
-                  Tarea IA
+                  <span>Tarea IA</span>
                 </div>
               </TableHead>
-              <TableHead className="font-semibold text-slate-700 dark:text-slate-300">
-                <div className="flex items-center gap-2">
+              <TableHead className="w-32 font-semibold text-slate-700 dark:text-slate-300 text-center">
+                <div className="flex items-center gap-2 justify-center">
                   <Calendar className="h-4 w-4" />
-                  Fecha
+                  <span>Fecha</span>
                 </div>
               </TableHead>
             </TableRow>
@@ -727,15 +727,15 @@ const EmailsView = () => {
                       onChange={(e) => toggleSelect(email.id, e.currentTarget.checked)}
                     />
                   </TableCell>
-                  <TableCell className="font-medium text-slate-900 dark:text-slate-100">
+                  <TableCell className="min-w-[180px] max-w-[220px] font-medium text-slate-900 dark:text-slate-100 truncate">
                     <div className="flex items-center gap-2">
                       <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-violet-600 flex items-center justify-center text-white text-xs font-bold shadow-sm">
                         {email.email[0].toUpperCase()}
                       </div>
-                      <span className="truncate max-w-[200px]">{email.email}</span>
+                      <span className="truncate" title={email.email}>{email.email}</span>
                     </div>
                   </TableCell>
-                  <TableCell className="max-w-md">
+                  <TableCell className="min-w-[260px] max-w-[320px]">
                     <div className="truncate font-medium text-slate-800 dark:text-slate-200" title={email.subject}>
                       {email.subject}
                     </div>
@@ -809,7 +809,7 @@ const EmailsView = () => {
               );
             })}
           </TableBody>
-        </Table>
+          </Table>
       </Card>
 
       {/* Paginación */}

@@ -144,9 +144,9 @@ const EmailDetailsDialog = ({ email, open, onOpenChange }: EmailDetailsDialogPro
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         className="max-w-full w-full sm:max-w-2xl md:max-w-3xl lg:max-w-4xl xl:max-w-5xl bg-white dark:bg-slate-900 border-2 border-slate-300 dark:border-slate-700 z-[9999] p-0 flex flex-col items-center justify-center"
-        style={{ maxHeight: '90vh', overflow: 'auto', margin: '0 auto' }}
+        style={{ maxHeight: '90vh', margin: '0 auto' }}
       >
-        <div className="w-full max-w-2xl mx-auto p-6">
+        <div className="w-full max-w-2xl mx-auto p-6 flex flex-col gap-6 overflow-y-auto" style={{ maxHeight: '80vh' }}>
           <DialogHeader>
             <DialogTitle className="text-2xl break-words">{email.subject}</DialogTitle>
             <DialogDescription>Detalles completos del email</DialogDescription>
@@ -246,7 +246,7 @@ const EmailDetailsDialog = ({ email, open, onOpenChange }: EmailDetailsDialogPro
             {/* Email Body */}
             <div className="space-y-2">
               <h4 className="font-semibold text-sm text-foreground">Contenido</h4>
-              <div className="bg-muted/30 p-4 rounded-lg border border-border max-h-64 overflow-auto">
+              <div className="bg-muted/30 p-4 rounded-lg border border-border min-h-[120px]">
                 <p className="text-sm text-foreground whitespace-pre-wrap break-words">
                   {email.body ||
                     "Este es el contenido del email. En la versión completa, aquí se mostrará el cuerpo completo del mensaje con formato preservado."}
